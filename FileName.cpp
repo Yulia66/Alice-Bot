@@ -60,7 +60,9 @@ vector<string> split_by_spaces(const std::string& str) {
 
 
 vector<int> pars_line(string str) {
+
     int pos;
+    
     if ((pos=str.find(",")) != std::string::npos) {
         str.replace(pos, 1, " ");
     }
@@ -91,29 +93,26 @@ vector<string> divide(string str){
 }
 
 
+
+
+
 void parser_input(int& gems, size_t& count, vector<Room>& rooms, string str) {
     vector<string> vec = divide(str);
     count = stoi(vec[0]);
     for (int i = 1; i < vec.size()-1; i++) {
        vector<int> res = pars_line(vec[i]);
        Room room;
-       if (res.size() == 7) {
-           room._id = res[0];
-           room._neighbors.push_back(res[1]);
-           room._neighbors.push_back(res[2]);
-           room._resources.push_back(res[3]);
-           room._resources.push_back(res[4]);
-           room._resources.push_back(res[5]);
-           room._resources.push_back(res[6]);
+
+       room._id = res[0];
+       for (int i = res.size() - 1; i > res.size() - 1 - 4; i--) {
+           room._resources.push_back(res[i]);
        }
-       if (res.size() == 6) {
-           room._id = res[0];
-           room._neighbors.push_back(res[1]);
-           room._resources.push_back(res[2]);
-           room._resources.push_back(res[3]);
-           room._resources.push_back(res[4]);
-           room._resources.push_back(res[5]);
+       reverse(room._resources.begin(), room._resources.end());
+       for (int i = 1; i < res.size() - 4; i++) {
+           room._neighbors.push_back(res[i]);
        }
+       
+       
        rooms.push_back(room);
        
 
@@ -253,41 +252,21 @@ int main() {
     int healf;
 
     vector<Room> rooms;
-    for (int i = 0; i <= 5; i++) {  // 5 - это N, всего комнат N+1 = 6
-        rooms.push_back(Room(i));
-    }
-    //parser_input(food,count, rooms, content);
-    count = 5;
-    food = 8;
-    rooms[0]._neighbors = {1,2};
-    rooms[1]._neighbors = { 0,3 };
-    rooms[2]._neighbors = { 0,4 };
-    rooms[3]._neighbors = { 1,4 };
-    rooms[4]._neighbors = { 2,3,5 };
-    rooms[5]._neighbors = { 4 };
-    // Комната 0: вход, ресурсов нет
-    rooms[0]._resources = { 0, 0, 0, 0 };  // iron, gold, gems, exp
 
-    // Комната 1
-    rooms[1]._resources = { 5, 2, 1, 15 };  // iron=5, gold=2, gems=1, exp=15
-
-    // Комната 2
-    rooms[2]._resources = { 3, 2, 1, 10 };  // iron=3, gold=2, gems=1, exp=10
-
-    // Комната 3
-    rooms[3]._resources = { 1, 0, 2, 40 };  // iron=1, gold=0, gems=2, exp=40
-
-    // Комната 4
-    rooms[4]._resources = { 2, 4, 0, 15 };  // iron=2, gold=4, gems=0, exp=15
-
-    // Комната 5
-    rooms[5]._resources = { 0, 5, 4, 10 };  // iron=0, gold=5, gems=4, exp=10
+    parser_input(food, count, rooms, content);
     healf = food;
-    
-    //cout << count << endl << gems  << endl;
-
-
-   
+    for (int i = 0; i < rooms.size(); i++) {
+        for (int neighbor : rooms[i]._neighbors) {
+            // Проверить, есть ли уже обратная связь
+            bool found = false;
+            for (int back : rooms[neighbor]._neighbors) {
+                if (back == i) found = true;
+            }
+            if (!found) {
+                rooms[neighbor]._neighbors.push_back(i);
+            }
+        }
+    }
 
      // фаза исследования
     rooms[0]._visible = true;
@@ -335,6 +314,8 @@ int main() {
                 if (bestIdx == 2) gems += bestVal;
                 if (bestIdx == 3) exp += bestVal;
 
+                int i = rooms[cur]._resources[bestIdx];
+                rooms[cur]._resources[bestIdx] = i - 1;
                 // Учёт еды
                 if (!rooms[cur]._hasFirstCollect) {
                     rooms[cur]._hasFirstCollect = true;   // первый сбор — бесплатно
@@ -396,9 +377,9 @@ int main() {
     
     for (auto i : path) {
         cur = i;
-        cout << " cur" << " "<< cur;
+       // cout << " cur" << " "<< cur;
         if (cur == 0) break;
-        while (food > size_path-1 && food > 0) {
+        while (food > size_path - 1 && food > 0) {
                 int bestIdx = -1, bestVal = -1;
 
 
@@ -418,6 +399,8 @@ int main() {
                     if (bestIdx == 2) gems += bestVal;
                     if (bestIdx == 3) exp += bestVal;
 
+                    int i = rooms[cur]._resources[bestIdx];
+                    rooms[cur]._resources[bestIdx] = i - 1;
                     // Учёт еды
                     if (!rooms[cur]._hasFirstCollect) {
                         rooms[cur]._hasFirstCollect = true;   // первый сбор — бесплатно
@@ -428,8 +411,8 @@ int main() {
                         //if (food <= healf / 2) break;
                     }
                 }
-                //cout << "Перешли в комнату " << cur << ", еды осталось: " << food << endl;
-                //cout << iron << " " << gold << " " << gems << " " << exp << endl;
+                cout << "Перешли в комнату " << cur << ", еды осталось: " << food << " ";
+                cout << iron << " " << gold << " " << gems << " " << exp << endl;
 
         }
         size_path--;
