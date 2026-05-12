@@ -1,0 +1,5 @@
+﻿  FileName.cpp
+C:\Users\ajlak\source\repos\EXAMPLES\Project4\FileName.cpp(64,22): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+  Project4.vcxproj -> C:\Users\ajlak\source\repos\EXAMPLES\x64\Debug\Project4.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.
